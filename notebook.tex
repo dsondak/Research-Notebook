@@ -158,7 +158,7 @@
 %\newexperiment{example2}[Example experiment 2]{This is another example experiment}
 %\newexperiment{example3}[Example experiment 3]{This is yet another example experiment}
 
-\newsubexperiment{DataTypes}[Data Types in FEniCS]{Be carefule with data types in FEniCS}
+\newsubexperiment{DataTypes}[Data Types in FEniCS]{Be careful with data types in FEniCS}
 \newsubexperiment{AltImplement}[Alt. C++ Interface]{Alternate implementation of C++ interface}
 \newsubexperiment{Jacobians}[Manual Jacobians]{Manual calculation of reaction rate Jacobian}
 
@@ -200,28 +200,24 @@ Worked on implementation of chemical reaction terms in FEniCS via a C++ interfac
 %-----------------------------------------
 
 \experiment{ChemFEniCS}
-
-Worked on implementation of chemical reaction terms in FEniCS via a C++ interface in Python.
+Computation of the chemical reaction terms was added as a giant C++ string within the Python code.  The code runs without errors, but its performance has not yet been verified.  Today I started to include PDEs for species and energy.
 
 %-----------------------------------------
 
 \subexperiment{DataTypes}
+After modifying the \fenics code to include finite element spaces for the temperature and chemical species, the chemical reaction C++ code stopped working.  It turns out that this was because the Dolfin command \texttt{T,Y = dl.split(SOL)},  where \texttt{SOL} is the solution, \textit{changes} the data types of \texttt{T} and \texttt{Y}.  In fact, this command should not be used any longer.  The correct way to get \texttt{T} and \texttt{Y} from \texttt{SOL} is to use the command \texttt{T, Y = SOL.split()}.
 
-Figured out some things about \fenics data types...
-
+Another issue is that when computing the density from \texttt{rho = Back\_Press/R/T} the variable \texttt{rho} is also not of the correct form.  One way to fix this is to compute \texttt{rho} as an expression.  A better way (maybe) is to compute \texttt{rho} within the C++ code segment during computation of the reaction terms.  In this way, there is no need to pass \texttt{rho} to the reaction code.
 
 %-----------------------------------------
 
 \subexperiment{AltImplement}
-
-Possible way of interfacing a C++ file with \fenics\ldots
+Right now the code has a giant C++ string in the middle that is read as an expression.  Chris said that there is a relatively straight-forward way of interfacing an external C++ code with Python.  Here is an example:  \href{http://hplgit.github.io/fenics-mixed/doc/pub/sphinx-cbc/.\_part0003\_fenics-mixed.html}{Probe.cpp Example}.  This would be the preferred way to implement the chemical reaction terms.  It is more modular and the code would be cleaner.
 
 %-----------------------------------------
 
 \subexperiment{Jacobians}
-
-Derived Jacobians for reaction terms\ldots
-
+\fenics cannot differentiate through the C++ expressions.  In order to get the Jacobian correct, it appears necessary to compute the Jacobian for the chemical reaction terms by hand.  I computed these by hand for the chemical reaction term in the species equation, $\dot\omega_{k}$.  I may include these terms in the \texttt{chemistry.tex} document if we go foward with their implementation.  Chris said that there is a way to specify automatic differentiation of these terms via the C++ interface but I have not looked into this yet.
 %-----------------------------------------
 %\end{addmargin}
 
