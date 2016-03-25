@@ -144,7 +144,7 @@
 %       NEW COMMANDS
 %----------------------------------------------------------------------------------------
 
-\newcommand{\fenics}{FEniCS}
+\newcommand{\fenics}{FEniCS \ }
 
 
 %----------------------------------------------------------------------------------------
@@ -155,12 +155,14 @@
 % <abbrev> is the reference to use later in the .tex file in \experiment{}, the <short form> is only used in the table of contents and running title - it is optional, <long form> is what is printed in the lab book itself
 
 \newexperiment{ChemFEniCS}[Chemistry in FEniCS]{Implementation of Chemical Reaction Terms in FEniCS}
-%\newexperiment{example2}[Example experiment 2]{This is another example experiment}
+\newexperiment{StochasticOP}[Stochastic Operator]{Development of the Stochastic Operator for Model Inadequacy}
 %\newexperiment{example3}[Example experiment 3]{This is yet another example experiment}
 
 \newsubexperiment{DataTypes}[Data Types in FEniCS]{Be careful with data types in FEniCS}
 \newsubexperiment{AltImplement}[Alt. C++ Interface]{Alternate implementation of C++ interface}
 \newsubexperiment{Jacobians}[Manual Jacobians]{Manual calculation of reaction rate Jacobian}
+
+\newsubexperiment{Cathcalls}[Catchall Reactions]{Development of the Catchall Reactions}
 
 %----------------------------------------------------------------------------------------
 
@@ -193,7 +195,7 @@
 %	LAB BOOK CONTENTS
 %----------------------------------------------------------------------------------------
 
-\labday{Wednesday 23 March 2016}
+\labday{Wednesday, 23 March, 2016}
 
 Worked on implementation of chemical reaction terms in FEniCS via a C++ interface in Python.
 
@@ -218,6 +220,26 @@ Right now the code has a giant C++ string in the middle that is read as an expre
 
 \subexperiment{Jacobians}
 \fenics cannot differentiate through the C++ expressions.  In order to get the Jacobian correct, it appears necessary to compute the Jacobian for the chemical reaction terms by hand.  I computed these by hand for the chemical reaction term in the species equation, $\dot\omega_{k}$.  I may include these terms in the \texttt{chemistry.tex} document if we go foward with their implementation.  Chris said that there is a way to specify automatic differentiation of these terms via the C++ interface but I have not looked into this yet.
+%-----------------------------------------
+
+\labday{Thursday, 24 March, 2016}
+
+Automated the catchall reactions.  Met with Chris to go over \fenics C++ interface issues.
+
+%-----------------------------------------
+
+\experiment{ChemFEniCS}
+Met with Chris to discuss C++ interface in \fenics for chemical reaction terms.  I tried to get the probe.cpp example to run from the \fenics documentation but got several errors.  Chris thought that this may be due to me running with \fenics version 1.5.  He showed me how to run \fenics version 1.6 on \textit{bender}.  Right now, this is the only place where \fenics v1.6 is accessible (unless I do a local install as well).  Either way, the probe.cpp example still doesn't work.  Chris is looking into this.  In the meantime, I will work on implementing the Jacobians by hand in my original chemical reactions implementation (giant C++ string).
+%-----------------------------------------
+
+\experiment{StochasticOP}
+Found a way to automate generation of the catchall reactions.
+
+\subexperiment{Cathcalls}
+Wrote down how to automatically generate and compute the cathcall reactions.  The user still only needs to supply a prime number decomposition of the species and a key of prime numbers indicating which element gets which prime number.  The new method counts the number of nonlinear equations and builds up a coefficient matrix which is then used to generate the reactions.  This matrix can also be used to specify the reaction order.  However, we will take the reaction order to be unity for now.
+
+I still need to implement it.  One other order of business is to remove a redundancy in the input file.  Right now, the user provides the prime number representation of each species \textit{and} a zero-multiplicity version of the prime number representation.  This zero-multiplicity version is most likely unecessary and can probably be computed from the original prime number representation.
+
 %-----------------------------------------
 %\end{addmargin}
 
