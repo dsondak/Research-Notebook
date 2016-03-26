@@ -145,6 +145,8 @@
 %----------------------------------------------------------------------------------------
 
 \newcommand{\fenics}{FEniCS \ }
+\newcommand{\lr}[1]{\left(#1\right)}
+\newcommand{\pdeone}[2]{\frac{\partial #1}{\partial #2}}
 
 
 %----------------------------------------------------------------------------------------
@@ -239,6 +241,29 @@ Found a way to automate generation of the catchall reactions.
 Wrote down how to automatically generate and compute the cathcall reactions.  The user still only needs to supply a prime number decomposition of the species and a key of prime numbers indicating which element gets which prime number.  The new method counts the number of nonlinear equations and builds up a coefficient matrix which is then used to generate the reactions.  This matrix can also be used to specify the reaction order.  However, we will take the reaction order to be unity for now.
 
 I still need to implement it.  One other order of business is to remove a redundancy in the input file.  Right now, the user provides the prime number representation of each species \textit{and} a zero-multiplicity version of the prime number representation.  This zero-multiplicity version is most likely unecessary and can probably be computed from the original prime number representation.
+
+\labday{Friday, 25 March, 2016}
+\begin{itemize}
+  \item Implemented automation of catchall reactions.
+  \item Implemented part of the Jacobian in the chemical reaction terms.
+\end{itemize}
+
+%-----------------------------------------
+
+\experiment{ChemFEniCS}
+Implemented part of the Jacobian of the reaction rate
+\begin{align*}
+  \hspace{-1.0em}\pdeone{\dot\omega_{k}}{Y_{i}} = W_{k}\sum_{j=1}^{M}\nu_{kj}\left[k_{j}^{f}\lr{T}\lr{\frac{\rho}{W_{i}}\nu_{ij}^{\prime}}\lr{\frac{\rho}{W_{i}}Y_{i}}^{\nu_{ij}^{\prime}-1}\prod_{\substack{l=1 \\ l\neq i}}^{N}\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{lj}^{\prime}} - k_{j}^{r}\lr{T}\lr{\frac{\rho}{W_{i}}\nu_{ij}^{\prime\prime}}\lr{\frac{\rho}{W_{i}}Y_{i}}^{\nu_{ij}^{\prime\prime}-1}\prod_{\substack{l=1 \\ l\neq i}}^{N}\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{lj}^{\prime\prime}}\right]
+\end{align*}
+The rest of the Jacobian, $\dfrac{\partial\dot\omega_{k}}{\partial T}$ is a big mess and is not recorded here.  It is in the hand-written lab notebook.  It is also not yet implemented due to its complexity.
+%-----------------------------------------
+
+\experiment{StochasticOP}
+Implemented automation of catchall species.  Up next is getting rid of the zero-multiplicity prime-factorization required in the input file.
+\subexperiment{Cathcalls}
+The automation of the catchall reactions is complete.  Results match previous runs thereby verifying correctness of the implementation.
+
+%-----------------------------------------
 
 %-----------------------------------------
 %\end{addmargin}
