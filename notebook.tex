@@ -119,6 +119,9 @@
 \counterwithout{figure}{labday}
 \counterwithout{equation}{labday}
 
+% For color boxes
+\usepackage{tcolorbox}
+
 % Hyperlink configuration
 \usepackage[
     pdfauthor={}, % Your name for the author field in the PDF
@@ -262,6 +265,54 @@ The rest of the Jacobian, $\dfrac{\partial\dot\omega_{k}}{\partial T}$ is a big 
 Implemented automation of catchall species.  Up next is getting rid of the zero-multiplicity prime-factorization required in the input file.
 \subexperiment{Cathcalls}
 The automation of the catchall reactions is complete.  Results match previous runs thereby verifying correctness of the implementation.
+
+\labday{Monday, 28 March, 2016}
+\begin{itemize}
+  \item Implemented part of the Jacobian in the chemical reaction terms.
+\end{itemize}
+
+%-----------------------------------------
+
+\experiment{ChemFEniCS}
+Spent the day implementing the Jacobian manually.  Ended up writing my own C++ file for the Jacobian to help facilitate debugging.
+
+\labday{Tuesday, 29 March, 2016}
+\begin{itemize}
+  \item Implemented part of the Jacobian in the chemical reaction terms.
+  \item Worked on building Drekar and checking in thermal convection work.
+\end{itemize}
+
+%-----------------------------------------
+
+\experiment{ChemFEniCS}
+Finished implementing the Jacobian in \fenics.  Everything compiles fine.  To check:
+\begin{enumerate}
+  \item I assumed that the Jacobian in \fenics is formed via row-major order.  So, each row is a variable and the columns are its derivatives.  This may not be correct.  Apparently the only way to figure it out is to give it a go and see what breaks.
+  \item I would like to implement the species equations in a single vector equation.  At the moment, the weak form for each species equation is formed and then they are summed together at the end.  The main problems preventing me from implementing things in vector form are that I'm not sure how \fenics handles matrices and the diffusion velocity should be a matrix.
+\end{enumerate}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=A note on the diffusion velocity:]
+Determining the diffusion velocity is quite a complicated task,
+\begin{align*}
+  \nabla X_{p} = \sum_{k=1}^{N}{\frac{X_{p}X_{k}}{\mathcal{D}_{pk}}\lr{V_{k} - V_{p}}} + \lr{Y_{p} - X_{p}}\frac{\nabla P}{P} + \frac{\rho}{p}\sum_{k=1}^{N}{Y_{p}Y_{k}\lr{f_{p} - f_{k}}}, \quad  p = 1,\ldots,N
+\end{align*}
+We can just use Fick's law for now,
+\begin{align*}
+  V_{p} = -D\nabla\ln\lr{Y_{p}}.
+\end{align*}
+But note that this is
+\begin{align*}
+  V_{p} = -\frac{D}{Y_{p}}\nabla Y_{p}.
+\end{align*}
+In MK's code, he actually implements
+\begin{align*}
+  V_{p}Y_{p} = -D\nabla Y_{p}
+\end{align*}
+and calls this the diffusion velocity.  It turns out okay in the species equation because there is a product between $Y_{p}$ and $V_{k}$.  However, in the energy equation things are probably wrong.
+\end{tcolorbox}
+
+
+%-----------------------------------------
 
 %-----------------------------------------
 
