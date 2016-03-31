@@ -122,6 +122,9 @@
 % For color boxes
 \usepackage{tcolorbox}
 
+% For chemistry
+\usepackage{mhchem}
+
 % Hyperlink configuration
 \usepackage[
     pdfauthor={}, % Your name for the author field in the PDF
@@ -160,14 +163,16 @@
 % <abbrev> is the reference to use later in the .tex file in \experiment{}, the <short form> is only used in the table of contents and running title - it is optional, <long form> is what is printed in the lab book itself
 
 \newexperiment{ChemFEniCS}[Chemistry in FEniCS]{Implementation of Chemical Reaction Terms in FEniCS}
-\newexperiment{StochasticOP}[Stochastic Operator]{Development of the Stochastic Operator for Model Inadequacy}
-%\newexperiment{example3}[Example experiment 3]{This is yet another example experiment}
-
 \newsubexperiment{DataTypes}[Data Types in FEniCS]{Be careful with data types in FEniCS}
 \newsubexperiment{AltImplement}[Alt. C++ Interface]{Alternate implementation of C++ interface}
 \newsubexperiment{Jacobians}[Manual Jacobians]{Manual calculation of reaction rate Jacobian}
 
+\newexperiment{StochasticOP}[Stochastic Operator]{Development of the Stochastic Operator for Model Inadequacy}
 \newsubexperiment{Cathcalls}[Catchall Reactions]{Development of the Catchall Reactions}
+\newsubexperiment{Input File}[Input File]{Input File}
+
+\newexperiment{VMS-ThermalConv}[Drekar VMS TC]{Implementation of VMS terms for thermal convection.}
+\newsubexperiment{Building Drekar}[Building Drekar]{Notes on building Drekar}
 
 %----------------------------------------------------------------------------------------
 
@@ -311,8 +316,75 @@ In MK's code, he actually implements
 and calls this the diffusion velocity.  It turns out okay in the species equation because there is a product between $Y_{p}$ and $V_{k}$.  However, in the energy equation things are probably wrong.
 \end{tcolorbox}
 
-
 %-----------------------------------------
+
+\labday{Thursday, 31 March, 2016}
+\begin{itemize}
+  \item Updated 0-D reactor code to get rid of user-specified zero-multiplicity species prime factorization.
+  \item Tried to get Drekar to build with extended tests.
+  \item Worked on manual Jacobians.
+\end{itemize}
+
+\experiment{VMS-ThermalConv}
+Worked on building Drekar.
+
+\subexperiment{Building Drekar}
+\begin{tcolorbox}[colback=blue!5, colframe=blue!40!black, title=Checking out Drekar]
+To check out Drekar do the following:  
+\small
+\begin{enumerate}
+  \item \texttt{git clone git@github.com:trilinos/Trilinos.git}
+  \item \texttt{git clone dlsonda@software.sandia.gov:/space/sandiagit/DrekarBase}
+  \item \texttt{git clone dlsonda@software.sandia.gov:/space/sandiagit/DrekarResearch}
+\end{enumerate}
+\normalsize
+\end{tcolorbox}
+The configure script is okay if you don't want to run the extended system tests.  If you want to run the extended system tests, then some extra things need to be done.
+\begin{tcolorbox}[colback=blue!5, colframe=blue!40!black, title=Configuring Drekar with Extended System Tests]
+If extended system tests are enabled, then check the following:
+\begin{enumerate}
+  \item Check out the extended system tests: \hfill \texttt{svn co svn+ssh://software.sandia.gov/svn/DrekarSystemTests} 
+  \item Make sure \texttt{DrekarSystemTests} is at the same level as the \texttt{build} and \texttt{Trilinos} directories
+  \item The \texttt{.bashrc} file must set the path to include several libraries
+  \item Put the \texttt{bin} directory at the same level as the \texttt{Trilinos} directory
+\end{enumerate}
+\end{tcolorbox}
+
+\experiment{StochasticOP}
+Removed an input file line pertaining to the prime number representation of the species in the stochastic operator.
+
+\subexperiment{Input File}
+The old version of the stochastic operator automation required the user to provide a prime number decomposition of each species in the reaction, a key indicating the prime number of each atom, and a modified prime number decomposition of each species.  This modified prime number decomposition was referred to as the zero multiplicity prime number representation of the species.  
+A species $\mathcal{S}$ is represented by
+\begin{align*}
+  \mathcal{S} = \prod_{k=1}^{N}{X_{k}^{n_{k}}}
+\end{align*}
+where $X_{k}$ is the prime number representation of element $k$, $N$ is the number of atoms in the species and $n_{k}$ is the number of atoms of type $k$.  For example, hydroxyl is the species \ce{OH}.  If we assign \ce{H} the number $2$ and \ce{O} the number $3$ then \ce{OH} has the value of $6$.  Similarly, \ce{H2O} $= 2^{2}\cdot 3 = 12$.  The modified prime number representation ignores powers higher than $1$.  Thus, \ce{H2O} would have the value $6$ rather than $12$.  This representation is used in counting the number of nonzero entries in the stochastic matrix.
+
+The modified prime number decomposition of the species is now calculated from the full prime number representation of the species.  Now, the user only needs to provide the prime number representation of each species and the prime number key for the atoms.
+
+\experiment{ChemFEniCS}
+Trying to see what is wrong with my implementation of the Jacobians.
+
+\subexperiment{Jacobians}
+It looks like I was computing the Jacobians incorrectly.  Need to do the variational derivative properly.  In any case, Bob has decided that we won't do the Jacobians manually anymore.  Rather, we will use Antioch to handle the chemistry.  So, the problem may be moot now.
+%
+%Here are expressions for the Jacobian of the reaction rates of each species with respect to temperature.
+%\begin{align}
+%  \pdeone{\dot\omega_{k}}{T} &= W_{k}\sum_{k=1}^{M}\left\{\nu_{lj}\left[ \pdeone{k_{j}^{f}}{T}\prod_{l=1}^{N}{\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{kj}^{\prime}}} + k_{j}^{f}\pdeone{\rho}{T}\prod_{l=1}^{N}{\nu_{lj}^{\prime}\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{lj}^{\prime}-1}} \right. \right. \nonumber \\
+%                             & \left. \left. \qquad - \pdeone{k_{j}^{r}}{T}\prod_{l=1}^{N}{\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{kj}^{\prime\prime}}} - k_{j}^{r}\pdeone{\rho}{T}\prod_{l=1}^{N}{\nu_{lj}^{\prime\prime}\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{lj}^{\prime\prime}-1}} \right] \right\}. \label{eq:domegak_dT}
+%\end{align}
+%
+%Here are the rest of the expressions to close~\eqref{eq:domegak_dT}.  First,
+%\begin{align}
+%  \pdeone{k_{j}^{f}}{T} = A_{j}\beta_{j}T^{\beta_{j}-1}\exp\lr{-\frac{E_{j}}{RT}} + \lr{\frac{A_{j}E_{j}}{R}}T^{\beta_{j}-2}\exp\lr{-\frac{E_{j}}{RT}}.
+%\end{align}
+%
+%The derivative with respect to the backward rate is quite a bit more complicated.
+%\begin{align}
+%  \pdeone{k_{j}^{r}}{T} &= \pdeone{k_{j}^{f}}{T}\lr{\frac{p_{a}}{RT}}^{-\gamma}\exp\lr{-\frac{\Delta S_{j}}{R} + \frac{\Delta H_{j}}{RT}} \\
+%                        &\qquad k_{j}^{f}\left[\frac{\gamma}{T}\lr{\frac{p_{a}}{RT}}^{-\gamma}\exp\lr{-\frac{\Delta S_{j}}{R} + \frac{\Delta H_{j}}{RT}}\right]
+%\end{align}
 
 %-----------------------------------------
 
