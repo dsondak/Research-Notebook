@@ -21,13 +21,30 @@ Today I just worked on the heating rate values.
 \subexperiment{Heating Rate}
 Recall that the energy equation is
 \begin{align}
-  \odeone{T}{t} = -\dfrac{\displaystyle\sum_{k=1}^{N}{u_{k}\lr{T}\odeone{x_{k}}{t}}}{\displaystyle\sum_{i=1}^{N}{c_{vk}x_{k}}} + Q_{T}
+  \odeone{T}{t} = -\dfrac{\displaystyle\sum_{k=1}^{N}{u_{k}\lr{T}\odeone{x_{k}}{t}}}{\displaystyle\sum_{i=k}^{N}{c_{vk}x_{k}}} + Q_{T}
 \end{align}
 where $T$ is the temperature, $u_{k}\lr{T}$ is the internal energy of species $k$, $x_{k}$ is the molar concentration of species $k$ and $c_{vk}$ is the specific heat at constant volume of species $k$.  We have also included the heating rate $Q_{T}$ which may be a function of time or temperature.
 
-\begin{tcolorbox}[colback=blue!5, colframe=blue!40!black, title=Configuring Drekar with Extended System Tests]
-  x
+\begin{tcolorbox}[colback=blue!5, colframe=blue!40!black, title=Estimate of Heating Rate]
+  \begin{align*}
+    Q_{T} \approx \odeone{T}{x}s_{L}
+  \end{align*}
+  where $s_{L}$ is the laminar flame speed.
 \end{tcolorbox}
+
+The laminar flame speed for hydrogen-air premixed flames at $\phi = 1$ is approximately $2$ m/s.  The energy equation in one dimension reduces to
+\begin{align}
+  \rho s_{L}\odeone{T}{x} = \odeone{}{x}\lr{\frac{\lambda}{c_{p}} \odeone{T}{x}}
+\end{align}
+where we assumed constant specific heat among species and no reactions.  Integrating this from $T_{u}$ to $T_{b}$ and solving for the temperature gradient gives
+\begin{align}
+  \odeone{T}{x} = \frac{\rho_{u}c_{p}s_{L}}{\lambda_{b}}\lr{T_{b}-T_{u}}.
+\end{align}
+Hence,
+\begin{align}
+  Q_{T} \approx \frac{\rho_{u}c_{p}s_{L}^{2}}{\lambda_{b}}\lr{T_{b}-T_{u}}.
+\end{align}
+If we now use some very rough values for air of $\rho_{u} = 1.225$, $c_{p} \approx 1200$ and $\lambda_{b}=0.05$ and we use $T_{b}\approx 3000$, $T_{u} = 1500$ with $s_{L}=4$ (all in SI units and temperatures in Kelvin) then $Q_{T}\approx 10^{8}$.  Note that $T_{b}$ and $T_{u}$ were taken from a simulation of the 0-D reactor without any source term.
 
 %-----------------------------------------
 \experiment{VMS-ThermalConv}
