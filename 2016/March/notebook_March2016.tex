@@ -1,0 +1,191 @@
+%----------------------------------------------------------------------------------------
+%	LAB BOOK CONTENTS
+%----------------------------------------------------------------------------------------
+
+\labday{Wednesday, 23 March, 2016}
+
+Worked on implementation of chemical reaction terms in FEniCS via a C++ interface in Python.
+
+%-----------------------------------------
+
+\experiment{ChemFEniCS}
+Computation of the chemical reaction terms was added as a giant C++ string within the Python code.  The code runs without errors, but its performance has not yet been verified.  Today I started to include PDEs for species and energy.
+
+%-----------------------------------------
+
+\subexperiment{DataTypes}
+After modifying the \fenics code to include finite element spaces for the temperature and chemical species, the chemical reaction C++ code stopped working.  It turns out that this was because the Dolfin command \texttt{T,Y = dl.split(SOL)},  where \texttt{SOL} is the solution, \textit{changes} the data types of \texttt{T} and \texttt{Y}.  In fact, this command should not be used any longer.  The correct way to get \texttt{T} and \texttt{Y} from \texttt{SOL} is to use the command \texttt{T, Y = SOL.split()}.
+
+Another issue is that when computing the density from \texttt{rho = Back\_Press/R/T} the variable \texttt{rho} is also not of the correct form.  One way to fix this is to compute \texttt{rho} as an expression.  A better way (maybe) is to compute \texttt{rho} within the C++ code segment during computation of the reaction terms.  In this way, there is no need to pass \texttt{rho} to the reaction code.
+
+%-----------------------------------------
+
+\subexperiment{AltImplement}
+Right now the code has a giant C++ string in the middle that is read as an expression.  Chris said that there is a relatively straight-forward way of interfacing an external C++ code with Python.  Here is an example:  \href{http://hplgit.github.io/fenics-mixed/doc/pub/sphinx-cbc/.\_part0003\_fenics-mixed.html}{Probe.cpp Example}.  This would be the preferred way to implement the chemical reaction terms.  It is more modular and the code would be cleaner.
+
+%-----------------------------------------
+
+\subexperiment{Jacobians}
+\fenics cannot differentiate through the C++ expressions.  In order to get the Jacobian correct, it appears necessary to compute the Jacobian for the chemical reaction terms by hand.  I computed these by hand for the chemical reaction term in the species equation, $\dot\omega_{k}$.  I may include these terms in the \texttt{chemistry.tex} document if we go foward with their implementation.  Chris said that there is a way to specify automatic differentiation of these terms via the C++ interface but I have not looked into this yet.
+%-----------------------------------------
+
+\labday{Thursday, 24 March, 2016}
+
+Automated the catchall reactions.  Met with Chris to go over \fenics C++ interface issues.
+
+%-----------------------------------------
+
+\experiment{ChemFEniCS}
+Met with Chris to discuss C++ interface in \fenics for chemical reaction terms.  I tried to get the probe.cpp example to run from the \fenics documentation but got several errors.  Chris thought that this may be due to me running with \fenics version 1.5.  He showed me how to run \fenics version 1.6 on \textit{bender}.  Right now, this is the only place where \fenics v1.6 is accessible (unless I do a local install as well).  Either way, the probe.cpp example still doesn't work.  Chris is looking into this.  In the meantime, I will work on implementing the Jacobians by hand in my original chemical reactions implementation (giant C++ string).
+%-----------------------------------------
+
+\experiment{StochasticOP}
+Found a way to automate generation of the catchall reactions.
+
+\subexperiment{Cathcalls}
+Wrote down how to automatically generate and compute the cathcall reactions.  The user still only needs to supply a prime number decomposition of the species and a key of prime numbers indicating which element gets which prime number.  The new method counts the number of nonlinear equations and builds up a coefficient matrix which is then used to generate the reactions.  This matrix can also be used to specify the reaction order.  However, we will take the reaction order to be unity for now.
+
+I still need to implement it.  One other order of business is to remove a redundancy in the input file.  Right now, the user provides the prime number representation of each species \textit{and} a zero-multiplicity version of the prime number representation.  This zero-multiplicity version is most likely unecessary and can probably be computed from the original prime number representation.
+
+\labday{Friday, 25 March, 2016}
+\begin{itemize}
+  \item Implemented automation of catchall reactions.
+  \item Implemented part of the Jacobian in the chemical reaction terms.
+\end{itemize}
+
+%-----------------------------------------
+
+\experiment{ChemFEniCS}
+Implemented part of the Jacobian of the reaction rate
+\begin{align*}
+  \hspace{-1.0em}\pdeone{\dot\omega_{k}}{Y_{i}} = W_{k}\sum_{j=1}^{M}\nu_{kj}\left[k_{j}^{f}\lr{T}\lr{\frac{\rho}{W_{i}}\nu_{ij}^{\prime}}\lr{\frac{\rho}{W_{i}}Y_{i}}^{\nu_{ij}^{\prime}-1}\prod_{\substack{l=1 \\ l\neq i}}^{N}\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{lj}^{\prime}} - k_{j}^{r}\lr{T}\lr{\frac{\rho}{W_{i}}\nu_{ij}^{\prime\prime}}\lr{\frac{\rho}{W_{i}}Y_{i}}^{\nu_{ij}^{\prime\prime}-1}\prod_{\substack{l=1 \\ l\neq i}}^{N}\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{lj}^{\prime\prime}}\right]
+\end{align*}
+The rest of the Jacobian, $\dfrac{\partial\dot\omega_{k}}{\partial T}$ is a big mess and is not recorded here.  It is in the hand-written lab notebook.  It is also not yet implemented due to its complexity.
+%-----------------------------------------
+
+\experiment{StochasticOP}
+Implemented automation of catchall species.  Up next is getting rid of the zero-multiplicity prime-factorization required in the input file.
+\subexperiment{Cathcalls}
+The automation of the catchall reactions is complete.  Results match previous runs thereby verifying correctness of the implementation.
+
+\labday{Monday, 28 March, 2016}
+\begin{itemize}
+  \item Implemented part of the Jacobian in the chemical reaction terms.
+\end{itemize}
+
+%-----------------------------------------
+
+\experiment{ChemFEniCS}
+Spent the day implementing the Jacobian manually.  Ended up writing my own C++ file for the Jacobian to help facilitate debugging.
+
+\labday{Tuesday, 29 March, 2016}
+\begin{itemize}
+  \item Implemented part of the Jacobian in the chemical reaction terms.
+  \item Worked on building Drekar and checking in thermal convection work.
+\end{itemize}
+
+%-----------------------------------------
+
+\experiment{ChemFEniCS}
+Finished implementing the Jacobian in \fenics.  Everything compiles fine.  To check:
+\begin{enumerate}
+  \item I assumed that the Jacobian in \fenics is formed via row-major order.  So, each row is a variable and the columns are its derivatives.  This may not be correct.  Apparently the only way to figure it out is to give it a go and see what breaks.
+  \item I would like to implement the species equations in a single vector equation.  At the moment, the weak form for each species equation is formed and then they are summed together at the end.  The main problems preventing me from implementing things in vector form are that I'm not sure how \fenics handles matrices and the diffusion velocity should be a matrix.
+\end{enumerate}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=A note on the diffusion velocity:]
+Determining the diffusion velocity is quite a complicated task,
+\begin{align*}
+  \nabla X_{p} = \sum_{k=1}^{N}{\frac{X_{p}X_{k}}{\mathcal{D}_{pk}}\lr{V_{k} - V_{p}}} + \lr{Y_{p} - X_{p}}\frac{\nabla P}{P} + \frac{\rho}{p}\sum_{k=1}^{N}{Y_{p}Y_{k}\lr{f_{p} - f_{k}}}, \quad  p = 1,\ldots,N
+\end{align*}
+We can just use Fick's law for now,
+\begin{align*}
+  V_{p} = -D\nabla\ln\lr{Y_{p}}.
+\end{align*}
+But note that this is
+\begin{align*}
+  V_{p} = -\frac{D}{Y_{p}}\nabla Y_{p}.
+\end{align*}
+In MK's code, he actually implements
+\begin{align*}
+  V_{p}Y_{p} = -D\nabla Y_{p}
+\end{align*}
+and calls this the diffusion velocity.  It turns out okay in the species equation because there is a product between $Y_{p}$ and $V_{k}$.  However, in the energy equation things are probably wrong.
+\end{tcolorbox}
+
+%-----------------------------------------
+
+\labday{Thursday, 31 March, 2016}
+\begin{itemize}
+  \item Updated 0-D reactor code to get rid of user-specified zero-multiplicity species prime factorization.
+  \item Tried to get Drekar to build with extended tests.
+  \item Worked on manual Jacobians.
+\end{itemize}
+
+\experiment{VMS-ThermalConv}
+Worked on building Drekar.
+
+\subexperiment{Building Drekar}
+\begin{tcolorbox}[colback=blue!5, colframe=blue!40!black, title=Checking out Drekar]
+To check out Drekar do the following:  
+\small
+\begin{enumerate}
+  \item \texttt{git clone git@github.com:trilinos/Trilinos.git}
+  \item \texttt{git clone dlsonda@software.sandia.gov:/space/sandiagit/DrekarBase}
+  \item \texttt{git clone dlsonda@software.sandia.gov:/space/sandiagit/DrekarResearch}
+\end{enumerate}
+\normalsize
+\end{tcolorbox}
+The configure script is okay if you don't want to run the extended system tests.  If you want to run the extended system tests, then some extra things need to be done.
+\begin{tcolorbox}[colback=blue!5, colframe=blue!40!black, title=Configuring Drekar with Extended System Tests]
+If extended system tests are enabled, then check the following:
+\begin{enumerate}
+  \item Check out the extended system tests: \hfill \texttt{svn co svn+ssh://software.sandia.gov/svn/DrekarSystemTests} 
+  \item Make sure \texttt{DrekarSystemTests} is at the same level as the \texttt{build} and \texttt{Trilinos} directories
+  \item The \texttt{.bashrc} file must set the path to include several libraries
+  \item Put the \texttt{bin} directory at the same level as the \texttt{Trilinos} directory
+\end{enumerate}
+\end{tcolorbox}
+
+\experiment{StochasticOP}
+Removed an input file line pertaining to the prime number representation of the species in the stochastic operator.
+
+\subexperiment{Input File}
+The old version of the stochastic operator automation required the user to provide a prime number decomposition of each species in the reaction, a key indicating the prime number of each atom, and a modified prime number decomposition of each species.  This modified prime number decomposition was referred to as the zero multiplicity prime number representation of the species.  
+A species $\mathcal{S}$ is represented by
+\begin{align*}
+  \mathcal{S} = \prod_{k=1}^{N}{X_{k}^{n_{k}}}
+\end{align*}
+where $X_{k}$ is the prime number representation of element $k$, $N$ is the number of atoms in the species and $n_{k}$ is the number of atoms of type $k$.  For example, hydroxyl is the species \ce{OH}.  If we assign \ce{H} the number $2$ and \ce{O} the number $3$ then \ce{OH} has the value of $6$.  Similarly, \ce{H2O} $= 2^{2}\cdot 3 = 12$.  The modified prime number representation ignores powers higher than $1$.  Thus, \ce{H2O} would have the value $6$ rather than $12$.  This representation is used in counting the number of nonzero entries in the stochastic matrix.
+
+The modified prime number decomposition of the species is now calculated from the full prime number representation of the species.  Now, the user only needs to provide the prime number representation of each species and the prime number key for the atoms.
+
+\experiment{ChemFEniCS}
+Trying to see what is wrong with my implementation of the Jacobians.
+
+\subexperiment{Jacobians}
+It looks like I was computing the Jacobians incorrectly.  Need to do the variational derivative properly.  In any case, Bob has decided that we won't do the Jacobians manually anymore.  Rather, we will use Antioch to handle the chemistry.  So, the problem may be moot now.
+%
+%Here are expressions for the Jacobian of the reaction rates of each species with respect to temperature.
+%\begin{align}
+%  \pdeone{\dot\omega_{k}}{T} &= W_{k}\sum_{k=1}^{M}\left\{\nu_{lj}\left[ \pdeone{k_{j}^{f}}{T}\prod_{l=1}^{N}{\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{kj}^{\prime}}} + k_{j}^{f}\pdeone{\rho}{T}\prod_{l=1}^{N}{\nu_{lj}^{\prime}\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{lj}^{\prime}-1}} \right. \right. \nonumber \\
+%                             & \left. \left. \qquad - \pdeone{k_{j}^{r}}{T}\prod_{l=1}^{N}{\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{kj}^{\prime\prime}}} - k_{j}^{r}\pdeone{\rho}{T}\prod_{l=1}^{N}{\nu_{lj}^{\prime\prime}\lr{\frac{\rho}{W_{l}}Y_{l}}^{\nu_{lj}^{\prime\prime}-1}} \right] \right\}. \label{eq:domegak_dT}
+%\end{align}
+%
+%Here are the rest of the expressions to close~\eqref{eq:domegak_dT}.  First,
+%\begin{align}
+%  \pdeone{k_{j}^{f}}{T} = A_{j}\beta_{j}T^{\beta_{j}-1}\exp\lr{-\frac{E_{j}}{RT}} + \lr{\frac{A_{j}E_{j}}{R}}T^{\beta_{j}-2}\exp\lr{-\frac{E_{j}}{RT}}.
+%\end{align}
+%
+%The derivative with respect to the backward rate is quite a bit more complicated.
+%\begin{align}
+%  \pdeone{k_{j}^{r}}{T} &= \pdeone{k_{j}^{f}}{T}\lr{\frac{p_{a}}{RT}}^{-\gamma}\exp\lr{-\frac{\Delta S_{j}}{R} + \frac{\Delta H_{j}}{RT}} \\
+%                        &\qquad k_{j}^{f}\left[\frac{\gamma}{T}\lr{\frac{p_{a}}{RT}}^{-\gamma}\exp\lr{-\frac{\Delta S_{j}}{R} + \frac{\Delta H_{j}}{RT}}\right]
+%\end{align}
+
+%-----------------------------------------
+
+%-----------------------------------------
+%\end{addmargin}
+
+\end{document}

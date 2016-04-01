@@ -1,0 +1,41 @@
+%----------------------------------------------------------------------------------------
+%	LAB BOOK CONTENTS
+%----------------------------------------------------------------------------------------
+
+\labday{Friday, 1 April, 2016}
+\begin{enumerate}
+  \item Tried to find reasonable value for the heating rate in the energy equation for the zero-D reactor.
+  \item Finally got Drekar configured and compiled.  All tests, including extended tests, pass.  Errors when adding options for SUPG Energy evaluator.  Not clear what the errors are.
+\end{enumerate}
+
+%-----------------------------------------
+\experiment{0D Reactor}
+To do:
+\begin{enumerate}
+  \item Clean up code.  Add comments and document how it works.
+  \item Find reasonable heating rate values.
+  \item Run heating rate calibration.
+\end{enumerate}
+Today I just worked on the heating rate values.
+%-----------------------------------------
+\subexperiment{Heating Rate}
+Recall that the energy equation is
+\begin{align}
+  \odeone{T}{t} = -\dfrac{\displaystyle\sum_{k=1}^{N}{u_{k}\lr{T}\odeone{x_{k}}{t}}}{\displaystyle\sum_{i=1}^{N}{c_{vk}x_{k}}} + Q_{T}
+\end{align}
+where $T$ is the temperature, $u_{k}\lr{T}$ is the internal energy of species $k$, $x_{k}$ is the molar concentration of species $k$ and $c_{vk}$ is the specific heat at constant volume of species $k$.  We have also included the heating rate $Q_{T}$ which may be a function of time or temperature.
+
+\begin{tcolorbox}[colback=blue!5, colframe=blue!40!black, title=Configuring Drekar with Extended System Tests]
+  x
+\end{tcolorbox}
+
+%-----------------------------------------
+\experiment{VMS-ThermalConv}
+Worked on building Drekar.
+
+\subexperiment{Building Drekar}
+
+%-----------------------------------------
+%\end{addmargin}
+
+\end{document}
