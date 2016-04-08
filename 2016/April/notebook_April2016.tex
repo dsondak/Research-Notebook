@@ -52,6 +52,18 @@ Worked on building Drekar.
 
 \subexperiment{Building Drekar}
 
+\labday{Week of April 4th, 2016}
+\begin{itemize}
+  \item Spent the week in Lausanne, Switzerland at SIAM UQ 16.  Made some notes about papers to read.  Will hopefully read some of them on the plane ride home.
+  \item Thought about what plots to include in Janus particle paper but did not finish this.  Here's what I need to get:
+    \begin{enumerate}
+      \item Plot of $U\lr{t}$ for advection and no-advection cases with same values of $\alpha$ and $C$.
+      \item Plot of logarithmic decay for no-advection case.
+      \item Plots illustrating qualitative behavior of solution such as:  $U\lr{t}$ at for constant $C$ and various values of $\alpha$, $U\lr{t}$ for constant $\alpha$ and various values of $C$, illustration of different qualitative regimes such as peak velocity or not, plots of $t_{max}$ with $C$ and $\alpha$ when appropriate, relationship between final swimming velocity and $\alpha$ and $C$.
+    \end{enumerate}
+  \item Got motivated to use \fenics to do some tests of the old non-diagonal stabilization parameter.  First implement linear Burger's MHD (constant advection velocity and magnetic field coefficient), then do full Burger's MHD.  These tests will be \textit{steady} for now.  Then, when the solution looks decent, put in GLS stabilization and check solution again with the usual diagonal stabilization parameter.  Finally, put in the new non-diagonal stabilization parameter and compare the solutions.  If the solutions look good (which they should since we've done this before) then try out some two dimensional problems.  Will need to code up the full MHD equations.  Try to do Hartmann flow perhaps?  There may be some other interesting ones to try too.
+\end{itemize}
+
 %-----------------------------------------
 %\end{addmargin}
 
