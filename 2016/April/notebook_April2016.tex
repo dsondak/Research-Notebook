@@ -64,6 +64,31 @@ Worked on building Drekar.
   \item Got motivated to use \fenics to do some tests of the old non-diagonal stabilization parameter.  First implement linear Burger's MHD (constant advection velocity and magnetic field coefficient), then do full Burger's MHD.  These tests will be \textit{steady} for now.  Then, when the solution looks decent, put in GLS stabilization and check solution again with the usual diagonal stabilization parameter.  Finally, put in the new non-diagonal stabilization parameter and compare the solutions.  If the solutions look good (which they should since we've done this before) then try out some two dimensional problems.  Will need to code up the full MHD equations.  Try to do Hartmann flow perhaps?  There may be some other interesting ones to try too.
 \end{itemize}
 
+\experiment{0D Reactor}
+I didn't get to work on this, but here is a list of things to do:
+\begin{enumerate}
+  \item Get heating rate calculations going.  Just need to get that version of the code cleaned up a bit, but otherwise it should be ready to go.
+  \item Clean up general code for distribution.
+    \begin{enumerate}
+      \item Add better comments and remove junk comments.
+      \item Get ready to send forward problem version out without stochastic operator.  Make sure there is no clash between Rebecca's loop over initial temperatures and the heating rate version.  Could probably just give a flag here.  If someone specifies both a heating rate and various initial temperatures then throw an error.
+      \item Prep the stochastic operator version without calibration.  We will provide the calibrated parameters and they can just run the code with those parameters.
+      \item Figure out how to give them a version of the code that they can calibrate \textit{without} \texttt{QUESO}.
+    \end{enumerate}
+    \item Set up $\ce{NO_x}$ reactions:
+      \begin{align*}
+        \ce{N2 + O <--> NO + N} \\
+        \ce{N + O2 <--> NO + O} \\
+        \ce{N + OH <--> NO + H}
+      \end{align*}
+      The ODEs for these reactions will use \ce{N2}, \ce{O}, \ce{OH}, and \ce{H} as data and will be solved for \ce{NO} and \ce{N}.
+    \item Change from constant volume energy equation to constant pressure energy equation.  It could be as simple as
+      \begin{align*}
+        H = \sum_{i=1}^{n_{react}}{h_{i}\lr{T}x_{i}}
+      \end{align*}
+      and $\dfrac{\mathrm{d}H}{\mathrm{d}t} = 0$.  Then we'll just have enthalpies insteady of internal energies and $c_{p}$ instead of $c_{v}$.
+\end{enumerate}
+
 %-----------------------------------------
 %\end{addmargin}
 
