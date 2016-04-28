@@ -96,6 +96,59 @@ Flying back from Switzerland now.  Somewhere over the Atlantic (probably middle)
 \experiment{Janus Particles}
 Basically just did a parameter sweep over $\alpha$ and $C$ to determine how the final swimming velocity is affected by the parameters.  Save the data in \texttt{ascii} format as text files and made plots in Python.  Need to clean this up.  One thing I noticed is that the swimming velocity maybe have multiple maxima when it overshoots.  This probably precludes the original goal of plotting the time to maximum as a function of the parameters.  Still want to plot logarithmic decay of the case with no advection but this didn't go quite right.  Either way, I now have the data to compare swimming velocity with and without advection.  Another interesting thing to do may be to add in a non-symmetric coating function.  It'd be nice to have a ramp up and then quick decay.  Some combination of exponentials should do the trick.
 
+\labday{Wednesday, 27 April, 2016}
+Got a bit behind on the notebook.  Here are some of the main things that I've been working on.  First of all, the 0D reactor has been uploaded to the Bitbucket repo.  Here are the problemls that have been uploaded:
+\begin{enumerate}
+  \item Forward problem including both the reduced and detaile models.
+  \item Calibration of the reduced model.  Our version using \texttt{Queso} as well as a stripped down version have been provided.  The stripped down version requires the user to provide their own software for the inverse problem and QoI.
+  \item The inadequacy operator.  Our version using \texttt{Queso} as well as a stripped down version have been provided.  Once again, the stripped down version requires the user to provide their own software for the inverse problem and the QoI.
+\end{enumerate}
+Documentation for all of these problems has been provided.  Each file has been extensively commented, cleaned up and in some cases refactored.  New input files have also been created to help mitigate the amount that the user much recompile.
+
+I've been working on the calibration design for the heating rate problem.  I wrote a script that samples the parameter set $\left\{A, b, E_{a}\right\}$ and computes the ignition temperature for each set.  The resulting distribution is shown in figure~\ref{fig:Tig}.
+\begin{figure}[h]
+  \includegraphics[width=\textwidth]{figures/2016/April/Ignition_Temperature.pdf}
+  \caption{Distribution of ignition temperatures.  The negative values are due to not integrating for long enough or not starting at a low enough temperature.}
+  \label{fig:Tig}
+\end{figure}
+The next step is to actually perform the calibration.  First, run the detailed model to get a feel for how many sample points to run.  Based on the ignition temperature distribution, it probably makes sense to start at $T_{0}\approx 450$.  However, we don't want too many points sampled before ignition.  Hence, some trial and error may be necessary here.  We also need to make sure that we sample enough in the sharp layer after ignition.  The current $\Delta t$ should be sufficient for this ($\Delta t = 5\times 10^{-6}$).  May also be useful to run at one or two different heating rates to make sure the heating rate does not affect things too much.  The calibration will then just be run over a range of equivalence ratios ($\phi$).
+
+A few notes on distributions.  The normal distribution with mean $\mu$ and standard deviation $\sigma$ is
+\begin{align*}
+  \mathcal{N}\lr{x; \mu, \sigma^{2}} = \frac{1}{\sigma\sqrt{2\pi}}\exp\lr{\frac{\lr{x-\mu}^{2}}{2\sigma^{2}}}.
+\end{align*}
+We can compute the expected value as follows.
+\begin{align*}
+  \mathbb{E}\lr{x} &= \int_{-\infty}^{\infty}{x\mathcal{N}\lr{x;\mu, \sigma} \ \mathrm{d}x} \\
+                   &= \frac{1}{\sigma\sqrt{2\pi}}\int_{\infty}^{\infty}{x\exp\lr{\frac{\lr{x-\mu}^{2}}{2\sigma^{2}}} \ \mathrm{d}x} \\
+                   &= \frac{1}{\sigma\sqrt{2\pi}}\int_{\infty}^{\infty}{\lr{u+\mu}\exp\lr{-\frac{u^{2}}{2\sigma^{2}}} \ \mathrm{d}u} \\
+                   &= \frac{1}{\sigma\sqrt{2\pi}}\left[\int_{-\infty}^{\infty}{u \exp\lr{-\frac{u^{2}}{2\sigma^{2}}}\ \mathrm{d}x} + \int_{-\infty}^{\infty}{\mu \exp\lr{-\frac{u^{2}}{2\sigma^{2}}}\ \mathrm{d}x}\right] \\
+                   &= \frac{1}{\sigma\sqrt{2\pi}}\left[0 + \mu \sigma\sqrt{2\pi}\right] \\
+                   &= \mu.
+\end{align*}
+
+Another distribution that we use a lot is the lognormal distribution.  The idea is that the logarithm of the random variable is normally distributed.  We denote this by
+\begin{align*}
+  \ln\mathcal{N}\lr{x; \mu, \sigma} = \frac{1}{\sigma\sqrt{2\pi}}\int_{0}^{\infty}{\frac{1}{x}\exp\lr{\frac{\lr{\ln\lr{x} - \mu}^{2}}{2\sigma^{2}}} \ \mathrm{d}x}.
+\end{align*}
+Note that the random variable $x > 0$.  We can compute the mean as follows.
+\begin{align*}
+  \mathbb{E}\lr{\ln\mathcal{N}\lr{x; \mu, \sigma}} &= \frac{1}{\sigma\sqrt{2\pi}}\int_{0}^{\infty}{\exp\lr{\frac{\lr{\ln\lr{x} - \mu}^{2}}{2\sigma^{2}}}\ \mathrm{d}x} \\
+     &= \frac{1}{\sqrt{\pi}}\int_{-\infty}^{\infty}{e^{\mu}\exp\lr{\sqrt{2}\mu u}\exp\lr{-u^{2}} \ \mathrm{d}u}
+\end{align*}
+where we have used the substitution
+\begin{align*}
+  u = \frac{\ln\lr{x} - \mu}{\sqrt{2}\sigma}.
+\end{align*}
+Completing the square
+\begin{align*}
+  -u^{2} + \sqrt{2}\sigma u = -\left[\lr{u - \dfrac{\sigma}{\sqrt{2}}} - \dfrac{\sigma^{2}}{2}\right]
+\end{align*}
+results in
+\begin{align*}
+  \mathbb{E}\lr{\ln\mathcal{N}\lr{x; \mu, \sigma}} &= \frac{1}{\sqrt{\pi}}\exp\lr{\mu}\exp\lr{\frac{\sigma^{2}}{2}}\int_{-\infty}^{\infty}{\exp\lr{-\lr{u - \frac{\sigma}{\sqrt{2}}}^{2}}\ \mathrm{d}u} \\
+  &= \exp\lr{\mu + \frac{\sigma^{2}}{2}}.
+\end{align*}
 %-----------------------------------------
 %\end{addmargin}
 
