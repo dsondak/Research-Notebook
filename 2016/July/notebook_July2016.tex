@@ -164,6 +164,20 @@ through the diffusion flame to see if I can put some error bars on the plots.  I
 to do this for the plots with mixture fraction since the mixture fraction will also have error bars.
 However, maybe the spatial plots will show some inadequacy.
 
+I propagated $1000$ samples through the diffusion flame and computed the mean and standard deviation
+of the temperature at each grid point.  The results are plotted in Figure~\ref{fig:inad_T_x}.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/inad_T_x.pdf}
+  \caption{Inadequacy in temperature profile across the diffusion flame.  Dark shading represents two
+           standard deviations while light shading represents one standard deviation.  Most of the
+           inadequacy occurs near the boundary of the flame.}
+  \label{fig:inad_T_x}
+\end{figure}
+The calibrated reduced model does quite well at predicting the diffusion flame.  The main inadequacies 
+are found near the boundaries of the flame.  Otherwise, the detailed model falls easily within one
+standard deviation of the mean.
+
 
 
 \end{document}
