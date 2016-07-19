@@ -1,0 +1,30 @@
+%----------------------------------------------------------------------------------------
+%	LAB BOOK CONTENTS
+%----------------------------------------------------------------------------------------
+
+\labday{Friday, 13 May, 2016}
+
+
+%-----------------------------------------
+
+\experiment{0D Reactor}
+
+\subexperiment{Reduced Model Calibration}
+Working on getting chains for the reduced model.  The problem is that the chains are taking a while to settle down and that the rejection rate is high ($\sim 95\% - 99\%$).  We can deal with this in two ways.  First, to deal with the rejection rate, we can change algorithmic parameters such as the initial chain length, the adaptivity interval, scaling of the adaptivity and etc.  It can also be beneficial to change the proposal covariance matrix, $V$.  Making it smaller helps reduce the rejection rates but requires more time to explore the state space.  Here are the changes that I've made so far to Rebecca's code with regards to this issue:
+\begin{itemize}
+  \item $V$ was originally $V = \text{diag}\lr{10^{-4}}$.  I've changed it to $V = \text{diag}\lr{10^{-6}}$.
+  \item The prior covariance matrix, $V_{0}$ was originally $V_{0} = \text{diag}\lr{10^{-4}}$.  This basically corresponded to an overly informative prior and therefore it was not clear what the inference problem was even learning.  I've changed this to be $V_{0} = \text{diag}\lr{\sigma_{i}^{2}}$ where $\sigma_{i} = \mu_{i}/10$ and $\mu_{i}$ is the mean of the $\text{i}^{\text{th}}$ parameter.  Hence the covariance is a diagonal matrix wherein the standard deviation is $10\%$ of the mean.
+  \item I changed the variance on the observations from $10^{-4}$ to $10^{-3}$ for the concentrations.  The temperature variance was originally $1.0$ and I have now set it to be $10^{3}$ which is basically corresponds to a standard deviation that is $1.7\%$ of the temperature difference between post- and pre-ignition.  $3\%$ would be around $3\times 10^{3}$.
+  \item Another change that I made was to make the likelihood for the temperature include additive Gaussian noise on the temperature observations.  Rebecca was using a likelihood that corresponded to an unknown type of observation error.
+  \item A final change was to change the initial parameter values.  I ran a long change $10^{5}$ and noticed that the stationary values rather different than the values in the literature.  I eyeballed the final values from the inference (which was still not fully converged) and used those as the initial parameters.  The DRAM rejection rate is now around $70\%$ which is close to the rule of thumb that Damon gave me to me ($\approx 28\%$ acceptance rate).
+\end{itemize} 
+
+The other way to deal with our issue is to perform an optimization problem before starting the inference problem.  The optimization problem will attempt to find the MAP (Maximum a Posteriori) point and use this point as a seed for the MCMC (Markov Chain Monte Carlo) algorithm.  This will hopefully help to cut down on the burnin period.  The MAP point is the maximum of the posterior distribution.  Without knowing the MAP point, the MCMC algorithm will just start from whichever initial parameter values we provide it and search the state space until it begins to converge to the stationary values.  Once it finally reaches the stationary values then the posterior is being sampled.  It can take a very long time to reach the stationary point for arbitrary initial parameters.  This time is called burnin.  Now, if provide the initial parameters as an initial guess to an optimization algorithm then the optimizer will try to find the maximum of the posterior.  Once it finds the maximum, we can use those points as the starting point to the MCMC algorithm and therefore try to avoid the whole burnin issue and sample the posterior from the beginning.  There were some difficulties with this.
+\begin{itemize}
+  \item Had to figure out what the right options for the input file were.  Damon helped enormously with this.  He had to check in the lastest optimizer changes to \texttt{Queso} for me to fiddle with the optimizer parameters.
+  \item I spent a long time trying to figure out the correct combination of parameters to the optimizer.  The problem was that the prior covariance spanned somewhere around $10$ to $11$ orders of magnitude.  This made the optimization problem outrageously difficult to solve.  As such, none of the optimizer algorithms gave anything.
+  \item The way we figured the problem out was to set the likelihood to $1$.  This ensured that the optimizer was simply trying to find the maximum of the prior.  Also, to speed things up, I removed the model evaluations from the code.
+  \item Since our variances are based off of the initial states, I decided to scale the initial states.  In particular, I divided the intial states by $100$.  This way, the maximum covariance is around $10^{-2}$ and the minimum is around $10^{-4}$.  Without the model, the optimizer converges rapidly.  With the model, things are very slow.  Still waiting to see if I get any results.
+\end{itemize}
+
+\end{document}
