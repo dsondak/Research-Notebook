@@ -30,7 +30,7 @@ $x_{L} = -1$ and $x_{R} = 1$ which gives $u_{L} = -1$ and $u_{R} = 1$.  This giv
 a ``shock'' at the center of the domain as shown in figure~\ref{fig:burgers_shock}.
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.7\textwidth]{/Users/dsondak/Documents/Research/Notebook/Research-Notebook/figures/2016/July/burgers_shock.pdf}
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/burgers_shock.pdf}
   \caption{Illustration of \fenics solution to the steady Burger's equation~\eqref{eq:burgers} using $5000$ finite elements.}
   \label{fig:burgers_shock}
 \end{figure}
@@ -43,5 +43,127 @@ parameter.  Then I will introduce the nondiagonal stabilization parameter and
 start compiling the results and the paper.  I will also probably need to
 test everything on a two-dimensional problem.  We know that Hartmann flow
 doesn't work great.  I'll have to think of another one.
+
+\labday{Tuesday, 19 July, 2016}
+
+\experiment{Combustion Model Inadequacy}
+Nearing the end of the calibration of the reduced model.  The hold-up has been invalidating the
+reduced model.  The latest results indicate that we may be able to call the calibrated
+reduced model inadequate.
+
+\subexperiment{Chemical Kinetics Inadequacy}
+It would be nice to invalidate the calibrated reduced model based solely on the 0D reactor.  This has proven difficult
+for the five reaction reduced model (see discussion below).  I have tried to invalidate the model with a four
+reaction reduced model by removing the three-body reaction.  The algorithmic peformance is much improved (rejection
+rates of around $79\%$) and chains that appear stationary.  Figures~\ref{fig:chain_1}-\ref{fig:chain_4} present
+the chains from each of the four reactions.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/reaction0_chain.pdf}
+  \caption{Chains from the calibrated Arrhenius parameters for reaction 1.}
+  \label{fig:chain_1}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/reaction1_chain.pdf}
+  \caption{Chains from the calibrated Arrhenius parameters for reaction 2.  Note that the modified Arrhenius
+           parameter, $b$, was frozen in the simulations even though we present a chain.}
+  \label{fig:chain_2}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/reaction2_chain.pdf}
+  \caption{Chains from the calibrated Arrhenius parameters for reaction 3.}
+  \label{fig:chain_3}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/reaction3_chain.pdf}
+  \caption{Chains from the calibrated Arrhenius parameters for reaction 4.}
+  \label{fig:chain_4}
+\end{figure}
+We also provide the posterior and prior distributions for each parameter in Figures~\ref{fig:dist_1}-\ref{fig:dist_4}.  
+Note that the modified Arrhenius parameter, $b$, was not actually calibrated.  It was frozen during the simulation.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/reaction0_dist.pdf}
+  \caption{Posterior and prior distributions from the calibrated Arrhenius parameters for reaction 1.}
+  \label{fig:dist_1}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/reaction1_dist.pdf}
+  \caption{Posterior and prior distributions from the calibrated Arrhenius parameters for reaction 2.  Note that the modified Arrhenius
+           parameter, $b$, was frozen in the simulations even though we present a chain.}
+  \label{fig:dist_2}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/reaction2_dist.pdf}
+  \caption{Posterior and prior distributions from the calibrated Arrhenius parameters for reaction 3.}
+  \label{fig:dist_3}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/reaction3_dist.pdf}
+  \caption{Posterior and prior distributions from the calibrated Arrhenius parameters for reaction 4.}
+  \label{fig:dist_4}
+\end{figure}
+It appears that we are learning quite a bit about a few parameters.  The maximum likelihood and MAP point
+were obtained from the chains and the forward problem was run at each of these parameter sets.  The 
+problem was also run at the nominal parameter set.  Results were compared with the detailed model and are
+shown in Figure~\ref{fig:four_rxn_inad}.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/Toft_four_rxn_inad.pdf}
+  \caption{Time evolution of the temperature.  Comparisons are made between the four reaction reduced model
+           for three different parameter sets and the detailed model.  Results are shown at $\phi=1$ which
+           is the equivalence ratio at which the data was calibrated.}
+  \label{fig:four_rxn_inad}
+\end{figure}
+Even after calibration, the four reaction model is inadequate.  This may provide a simple route to helping
+Rebecca get her stuff going again.  I'll need to calibrate the stochastic operator on this problem and then
+see how things look.  For now, I need to get the stochastic operator up and running.
+
+\subexperiment{Diffusion Flame}
+The diffusion flame will eventually be used to build up a flamelet library.  For now, I'm just using it to
+see if it helps us invalidate the five reaction reduced mechanism.  Figures~\ref{fig:T_Z}-\ref{fig:H2_x} were generated
+from samples of the five reaction reduced mechanism.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/T_Z.pdf}
+  \caption{Temperature as a function of mixture fraction.}
+  \label{fig:T_Z}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/T_x.pdf}
+  \caption{Temperature as a function of space.}
+  \label{fig:T_x}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/H_Z.pdf}
+  \caption{Hydrogen as a function of mixture fraction.}
+  \label{fig:H2_Z}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/July/H_x.pdf}
+  \caption{Hydrogen as a function of space.}
+  \label{fig:H2_x}
+\end{figure}
+The plots of \ce{H} are clearly inadequate by almost any measure.  The plot of temperature with
+mixture fraction also appears inadequate.  However, when plotting temperature with space, the results
+look pretty good.  Other results indicate that some species are shifted in the domain.  That is, 
+the flame location is not correct.  The concentration of \ce{HO2} is horrendously off to the point
+where the reduced model predicts non-negligible concentrations while the detailed model predicts 
+that \ce{HO2} is a trace species.  A few species, such as \ce{H2O}, \ce{H2} and \ce{O2} are more
+or less correct as expected.  To quantify this a bit more, I will run a few samples from the chain
+through the diffusion flame to see if I can put some error bars on the plots.  It will be difficult
+to do this for the plots with mixture fraction since the mixture fraction will also have error bars.
+However, maybe the spatial plots will show some inadequacy.
+
+
 
 \end{document}
