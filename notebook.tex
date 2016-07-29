@@ -76,6 +76,8 @@
 \usepackage[norule]{footmisc} % Removes the horizontal rule from footnotes
 \usepackage{lastpage} % Counts the number of pages of the document
 
+\usepackage{natbib}
+
 \usepackage[dvipsnames]{xcolor}  % Allows the definition of hex colors
 \definecolor{titleblue}{rgb}{0.16,0.24,0.64} % Custom color for the title on the title page
 \definecolor{linkcolor}{rgb}{0,0,0.42} % Custom color for links - dark blue at the moment
@@ -155,6 +157,10 @@
 \newcommand{\pdeone}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\pden}[3]{\frac{\partial^{#3} #1}{\partial #2^{#3}}}
 \newcommand{\odeone}[2]{\frac{\mathrm{d} #1}{\mathrm{d} #2}}
+\newcommand{\nup}[1]{\nu_{#1}^{\prime\prime}}
+\newcommand{\nur}[1]{\nu_{#1}^{\prime}}
+\newcommand{\frate}[1]{K_{#1}^{\left(f\right)}}
+\newcommand{\rrate}[1]{K_{#1}^{\left(r\right)}}
 
 \input{experiment_list}
 
@@ -195,6 +201,9 @@
 %\input{2016/May/notebook_May2016.tex}
 \input{2016/July/notebook_July2016.tex}
 %-----------------------------------------
+
+\bibliographystyle{plain}
+\bibliography{references}
 
 %-----------------------------------------
 %\end{addmargin}
