@@ -4,7 +4,6 @@
 
 \labday{Friday, 08 July, 2016}
 
-
 %-----------------------------------------
 
 I have been remiss in writing in the research journal.  Many things have happened.
@@ -178,6 +177,93 @@ The calibrated reduced model does quite well at predicting the diffusion flame. 
 are found near the boundaries of the flame.  Otherwise, the detailed model falls easily within one
 standard deviation of the mean.
 
+%----------------------------------------------------------------------------------------
 
+\labday{Friday, 29 July, 2016}
 
-\end{document}
+%-----------------------------------------
+\experiment{Combustion Model Inadequacy}
+\begin{itemize}
+  \item Working on APS abtract for Turbulent Combustion session
+  \item Found a mistake in Rebecca's formulation.
+\end{itemize}
+
+\subexperiment{Chemical Kinetics Inadequacy}
+Theorem 3.2 in ~\cite{morrison2016representing} describes how to form a reaction based upon the stochastic operator.  The problem is that the stoichiometric coefficients are not treated correctly in the theorem.  They should enter as exponents, not as prefactors.  I present a description here of a system of reactions induced by the linear part of the stochastic operator.  Recall that the system of equations governing concentrations of species in the zero-D rector is
+\begin{align}
+  \odeone{\mathbf{x}}{t} = \mathbf{f}\lr{\mathbf{x}} + \mathcal{S}\mathbf{x} + \mathbf{g}\lr{\mathbf{x}} \label{eq:OD-system}
+\end{align}
+where $\mathbf{x} = \left[x_{1}, \ldots, x_{2}\right]^{T}$ is a vector containing species concentrations.  The $i^{\text{th}}$ component represents species $i$.  The right hand side consists of the chemical mechanism, $f\lr{\mathbf{x}}$, the linear part of the stochastic operator $\mathcal{S}\mathbf{x}$ and the so-called catchall reactions $g\lr{\mathbf{x}}$.  We will not consider the catchall reactions here because their form is not in question at the moment.  In chemical kinetics, the reaction rate for species $k$ given by
+\begin{align}
+  \dot{\omega}_{k} = \sum_{j=1}^{M}\lr{\nup{kj} - \nur{kj}}r_{j} \label{eq:react_rate}
+\end{align}
+where the progress rate of reaction $j$ is
+\begin{align}
+  r_{j} = \frate{j}\prod_{k=1}^{N}{x_{k}^{\nur{kj}}} - \rrate{j}\prod_{k=1}^{N}{x_{k}^{\nup{kj}}}.
+\end{align}
+Note that we are working with molar concentrations here.  To convert to mass fraction, we would multiply~\eqref{eq:react_rate} by the molecular weight of species $k$.  The classical expression for the forward reaction rate coefficient is the Arrhenius reaction rate
+\begin{align}
+  \frate{j} = A_{j}T^{b_{j}}\exp\lr{-\frac{E_{j}}{RT}} \label{eq:arrhenius}.
+\end{align}
+The goal is now to interpret $\mathcal{S}\mathbf{x}$ in terms of the previously described reaction rates.
+
+Note that the contribution to species $k$ from the linear part of the stochastic operator is
+\begin{align}
+  \lr{\mathcal{S}\mathbf{x}}_{k} = \sum_{j=1}^{N}{s_{kj}x_{j}}. \label{eq:Sx}
+\end{align}
+Equation~\eqref{eq:Sx} can be interpreted as a reaction rate induced by $N$ reactions of the form
+\begin{align}
+  \ce{x_{p} ->[$s_{kp}$] x_{k}}, \quad p \neq k
+\end{align}
+where the reaction rate parameter $\frate{j}$ is just a constant $s_{kj}$.  When $p = k$ a modification must be introduced,
+\begin{align}
+  \ce{x_{k} ->[$s_{kk}$] 2 x_{k}}.
+\end{align}
+
+To clarify this formulation, we do a couple of examples.  In the \ce{H2}-\ce{O2} example, the linear part of the stochastic operator contributes to atomic hydrogen via
+\begin{align}
+  \odeone{\left[\ce{H}\right]}{t} = f_{\ce{H}}\lr{\mathbf{x}} + s_{57}\left[\ce{OH}\right] + s_{58}\left[\ce{HO2}\right] + s_{59}\left[\ce{H2O}\right].
+\end{align}
+The set of reactions is therefore
+\begin{align}
+  \ce{OH ->[s_{57}] H} \\
+  \ce{HO2 ->[s_{58}] H} \\
+  \ce{H2O ->[s_{59}] H}.
+\end{align}
+The progress rates become
+\begin{align}
+  r_{1} = s_{57}\left[\ce{OH}\right] \\
+  r_{2} = s_{58}\left[\ce{HO2}\right] \\
+  r_{3} = s_{59}\left[\ce{H2O}\right]. 
+\end{align}
+Therefore, the reaction rate for the linear part of the operator is
+\begin{align}
+  \dot{\omega}_{\ce{H}} = s_{57}\left[\ce{OH}\right] + s_{58}\left[\ce{HO2}\right] + s_{59}\left[\ce{H2O}\right].
+\end{align}
+
+The contribution to hydrogen is more involved.  It is
+\begin{align}
+  \odeone{\left[\ce{H2}\right]}{t} = f_{\ce{H2}}\lr{\mathbf{x}} + s_{31}\left[\ce{H^{\prime}}\right] + s_{33}\left[\ce{H2}\right] + s_{35}\left[\ce{H}\right] + s_{37}\left[\ce{OH}\right] + s_{38}\left[\ce{HO2}\right] + s_{39}\left[\ce{H2O}\right].
+\end{align}
+The corresponding reaction set is
+\begin{align}
+  \ce{H^{\prime} ->[s_{31}] \ce{H2}} \\
+  \ce{H          ->[s_{35}] \ce{H2}} \\
+  \ce{OH         ->[s_{37}] \ce{H2}} \\
+  \ce{HO2        ->[s_{38}] \ce{H2}} \\
+  \ce{H2O        ->[s_{39}] \ce{H2}}
+\end{align}
+and
+\begin{align}
+  \ce{H2 ->[s_{33}] \ce{2H2}}
+\end{align}
+with reaction progress rates
+\begin{align}
+  r_{1} = s_{31}\left[\ce{H^{\prime}}\right] \\
+  r_{2} = s_{33}\left[\ce{H2}\right] \\
+  r_{3} = s_{35}\left[\ce{H}\right] \\
+  r_{4} = s_{37}\left[\ce{OH}\right] \\
+  r_{5} = s_{38}\left[\ce{HO2}\right] \\
+  r_{6} = s_{39}\left[\ce{H2O}\right].
+\end{align}
+We are then able to recover the reaction rate induced for \ce{H2} by the linear part of the stochastic operator.  Implementation of this formulation in the \textt{XML} input format will be a challenge.
