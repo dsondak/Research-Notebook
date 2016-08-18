@@ -1,0 +1,47 @@
+%----------------------------------------------------------------------------------------
+%	LAB BOOK CONTENTS
+%----------------------------------------------------------------------------------------
+
+\labday{Thursday, 18 August, 2016}
+
+%-----------------------------------------
+
+\experiment{0D Reactor}
+A few notes on the energy equation for the 0D reactor.  After ignoring all spatial
+dependence the energy equation becomes,
+\begin{align}
+  \rho C_{p}\odeone{T}{t} = \dot{\omega}_{T}^{\prime} + \dot{\mathcal{Q}}.
+\end{align}
+Substituting for the heat release due to combustion we have
+\begin{align}
+  \rho C_{p}\odeone{T}{t} = -\sum_{k=1}^{N}h_{k}\lr{T}\dot{\omega}_{k} + \dot{\mathcal{Q}}.
+\end{align}
+Note that all quantities are on a mass basis.  The 0D reactor uses molar quantities.
+\texttt{Antioch} returns mass quantities.  We need to check the units to make sure 
+everything works out.
+
+The species equation becomes
+\begin{align}
+  \odeone{\rho Y_{k}}{t} = \dot{\omega}_{k}.
+\end{align}
+Note that
+\begin{align}
+  \left[X_{k}\right] = \rho \frac{Y_{k}}{W_{k}} \Rightarrow \rho Y_{K} = W_{K}\left[X_{k}\right].
+\end{align}
+Now we have
+\begin{align}
+  \dot{x}_{k} = \odeone{\left[X_{k}\right]}{t} = \frac{\dot{\omega}_{k}}{W_{k}}.
+\end{align}
+And so the energy equation becomes
+\begin{align}
+  \rho C_{p}\odeone{T}{t} = - \sum_{k=1}^{N}h_{k}\lr{T}W_{k}\dot{x}_{k} + \dot{\mathcal{Q}}.
+\end{align}
+The specific heat is
+\begin{align}
+  C_{p} &= \sum_{k=1}^{N}C_{pk}Y_{k} \\
+        &= \sum_{k=1}^{N}C_{pk}\frac{W_{k}}{\rho}x_{k}.
+\end{align}
+Then
+\begin{align}
+  \odeone{T}{t} = \frac{\displaystyle -\sum_{k=1}^{N}h_{k}\lr{T}W_{k}\dot{x}_{k} + \dot{\mathcal{Q}}}{\displaystyle \sum_{k=1}^{N}C_{pk}W_{k}x_{k}}.
+\end{align}
