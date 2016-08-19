@@ -45,3 +45,52 @@ Then
 \begin{align}
   \odeone{T}{t} = \frac{\displaystyle -\sum_{k=1}^{N}h_{k}\lr{T}W_{k}\dot{x}_{k} + \dot{\mathcal{Q}}}{\displaystyle \sum_{k=1}^{N}C_{pk}W_{k}x_{k}}.
 \end{align}
+
+%::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+\labday{Friday, 19 August, 2016}
+%::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+\experiment{StochasticOP}
+Trying to calibrate the stochastic operator for chemical kinetics.
+Having the same problems as before with the reduced model.  Namely,
+the rejection rates are simply too high and the log likelihoods are
+too small.
+
+I'm trying a few things:
+\begin{itemize}
+  \item Turn off stochastic operator to try to recover calibration from
+        reduced model.
+  \item Modify global temperature dependence to try to get better
+        behavior.
+  \item Played a bit with the algorithm parameters (adaptation interval
+        length, etc).
+\end{itemize}
+
+Waiting to see the chains.  The global temperature dependence enters the
+operator via a prefactor as
+\begin{align}
+  \odeone{\mathbf{x}}{t} = \mathbf{f}\lr{\mathbf{x}} + 
+      g\lr{T}\left[\mathcal{S}\mathbf{x} + \mathcal{A}\lr{\mathbf{x}}\right].
+\end{align}
+The form that I have selected for the prefactor is
+\begin{align}
+  g\lr{T} = \frac{1}{2}\exp\lr{-\frac{T_{ag}}{T}}
+    \left[\tanh\lr{\frac{T - T_{gi}}{\delta}} - \tanh\lr{\frac{T - T_{adi}}{\delta}}\right].
+\end{align}
+This introduces three new parameters to calibrate:
+\begin{enumerate}
+  \item $T_{ag}$, the global activation energy;
+  \item $T_{gi}$, global ignition temperature;
+  \item $T_{adi}$, global adiabatic temperature.
+\end{enumerate}
+\begin{figure}[ht!]
+  \includegraphics[width=\textwidth]{/h1/dsondak/Research-Notebook/figures/2016/August/global_T.pdf}
+  \caption{Prefactor for the stochastic operator.}
+  \label{fig:gofT}
+\end{figure}
+Figure~\ref{fig:gofT} shows the behavior of the prefactor.  The hope is that this
+allows the stochastic operator to turn on and off as needed.  The Arrhenius form
+basically just sets the amplitude of the prefactor and the premultiplication of 
+$1/2$ just scales the hyperbolic tangents to unity (no real reason to do this
+other than it helps humans see what's going on).  The smoothing factor
+$\delta$ is selected to be unity.
