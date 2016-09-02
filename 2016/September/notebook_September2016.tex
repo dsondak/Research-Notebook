@@ -1,0 +1,77 @@
+%----------------------------------------------------------------------------------------
+%	LAB BOOK CONTENTS
+%----------------------------------------------------------------------------------------
+
+%::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+\labday{Friday, 2 September, 2016}
+%::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+\experiment{StochasticOP}
+We have decided to only calibrate the inadequacy parameters (and hyperparameters)
+and to freeze the model parameters.  The reason behind this is because inference
+of the model parameters is particularly difficult as evidenced by the high
+rejection rates.  Our current approach is defensible in the near-term because we
+are really only interested in calibration of the inadequacy parameters.  We are
+accepting the model parameters as truth (and truth be told, they are pretty 
+darn good).
+
+I have calibrated three versions of the inadequacy model: 1.) Using no global
+temperature dependence; 2.) using a global temperature dependence in Arrhenius
+form and 3.) using a global temerature dependence in the hyperbolic tangent form.
+With no global temperature dependence (and no model parameter inference) the 
+calibration is remarkably quick for the first $30000$ iterations.  However, 
+the reaction rates for the catchall reactions eventually cause the system to 
+become quite stiff and at iteration $\sim 34000$ the model evaluation times 
+are on the order of tens of minutes.  The rejection rates are still rather ``low''
+by our standards.  They hover somewhere between $76\%$ and $85\%$.  However,
+the likelihoods are very small (essentially zero).  For example, the loglikelihood
+at iteration $36000$ is around $-25000$.
+
+Using the Arrehnius global temperature dependence, the model evaluations are
+a bit slower and the rejecton rates are considerably higher ($\sim 96\%$).  
+The likelihoods are larger but still essentially zero ($-22000$ at iteration
+$36000$).
+
+With the global hyperbolic temperature dependence, the model evaluations 
+are comparable to those from the global Arrhenius temperature dependence. 
+The rejection rates are $\sim 91\%$ and the likelihoods are larger still 
+(but still essentially zero, e.g. $-7500$ at iteration $38000$).
+
+Note that the calibrations described above were run using data from 
+ten calibration points as opposed to data from twenty points as I had been
+doing previously.  The main point is that the calibration data should be 
+a reasonable representation of curves.  If ten points gives a decent 
+representation then adding more points causes more work and does not 
+give much in return.
+
+Additionally, the log likelihood actually has an additional factor that 
+I am not reporting.  Recall, the likelihood that we are using is 
+\begin{align}
+  L = \frac{1}{\lr{2\pi}^{n_{d}/2}\left|\Sigma\right|^{1/2}}
+     \exp\lr{-\frac{1}{2}\lr{\mathbf{d} - \mathbf{x}}^{T}\Sigma^{-1}\lr{\mathbf{d} - \mathbf{x}}}
+\end{align}
+where $\Sigma$ is a diagonal matrix of variances, $n_{d}$ is the number of data points (here
+$n_{d} = 10$, $\mathbf{d}$ is the truth data and $\mathbf{x}$ is the model data.  Note that for a 
+diagonal matrix 
+\begin{align}
+  \left|\Sigma\right| = \prod_{i=1}^{n}\sigma_{i}
+\end{align}
+where $n$ is the size of the matrix.  Here $\sigma_{i} = 5\cdot 10^{-3}$ for $i=1,\ldots 7$
+(for the first seven species), $\sigma_{8} = 2\cdot 10^{3}$ for the temperature 
+and $\sigma_{9} = 10$ for the ignition temperature data.  Hence
+\begin{align}
+  \left|\Sigma\right| = \lr{5\cdot 10^{-3}}^{7} \cdot 2\times 10^{3} \cdot 10.
+\end{align}
+The log-likelihood is 
+\begin{align}
+  \log\lr{L} = -\log\lr{\lr{2\pi}^{n_{d}/2}\left|\Sigma\right|^{1/2}} - 
+      \frac{1}{2}\lr{\mathbf{d} - \mathbf{x}}^{T}\Sigma^{-1}\lr{\mathbf{d} - \mathbf{x}}.
+\end{align}
+With our values, the first term is $4.403$.
+
+\experiment{Combustion Model Inadequacy}
+Trying to propagate the fully stochastic operator model through the flamelet model to generate 
+the uncertain flamelet.
+
+\subexperiment{Diffusion Flame}
+Considerable changes had to be made to the 
