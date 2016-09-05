@@ -67,11 +67,106 @@ The log-likelihood is
   \log\lr{L} = -\log\lr{\lr{2\pi}^{n_{d}/2}\left|\Sigma\right|^{1/2}} - 
       \frac{1}{2}\lr{\mathbf{d} - \mathbf{x}}^{T}\Sigma^{-1}\lr{\mathbf{d} - \mathbf{x}}.
 \end{align}
-With our values, the first term is $4.403$.
+With our values, the first term is $4.403$.  It has very little effect on the full
+log likelihood.
 
 \experiment{Combustion Model Inadequacy}
 Trying to propagate the fully stochastic operator model through the flamelet model to generate 
 the uncertain flamelet.
 
 \subexperiment{Diffusion Flame}
-Considerable changes had to be made to the 
+Considerable changes had to be made to the Cantera input files to propagate the stochastic 
+operator through the diffusion flame.  Rebecca's original template was incomplete.  First of 
+all, the NASA polynomials of order $n$ must have $n$ coefficients specified.  Unspecified 
+coefficients are not assumed to be zero and an error is thrown.  The NASA polynomial 
+coefficients do not map directly to the quadratic form assumed by Rebecca for the inference. 
+Recall that the NASA polynomial for the enthalpy is given by 
+\begin{align}
+  \frac{h}{RT} = a_{0} + \frac{a_{1}}{2}T + \frac{a_{2}}{3}T^{2} + \frac{a_{3}}{4}T^{3} + 
+       \frac{a_{4}}{5}T^{4} + \frac{a_{5}}{T}
+\end{align}
+whereas Rebecca's parameterization for the catchall species looks like 
+\begin{align}
+  h^{\prime} = \alpha_{0} + \alpha_{1}T + \alpha_{2}T^{2}.
+\end{align}
+Thus, to insure consistency in the input file, we have the relationships,
+\begin{align}
+  a_{0} = \frac{\alpha_{1}}{R}, \quad a_{1} = \frac{2\alpha_{2}}{R}, \quad a_{5} = \frac{\alpha_{0}}{R}
+\end{align}
+and $a_{i} = 0$ for $i=2, 3, 4$.
+
+Another difficulty is how exactly to specify the catchall species.  We know that $\ce{H}^{\prime}$ 
+is made up of hydrogen.  However, Cantera gets confused between two species which has the exact 
+same compositions.  We initially tried to define our own atom (a dummy atom) which would have
+the exact same properties as $\ce{H}$.  However, this resulted in Cantera errors.  Both
+approaches caused Cantera to fail in the \texttt{set\_initial\_guess} method at the \texttt{equilibrate} 
+step.  In that step, Cantera attempts to set a reasonable initial guess to kick off the simulation 
+based off an equilibrium solution. 
+
+The way that I got around these convergence issues was to change the \texttt{set\_initial\_guess} 
+method in addition to the actual initial guesses (this is actually independent somehow).  
+The \texttt{set\_initial\_guess} method must be called one way or another.  It appears to 
+set up important solution objects.  To get the inadequacy model to run, I used a previous 
+solution from the reduced model.  I also modified the \texttt{set\_initial\_guess} method 
+to accept a flag called \texttt{calc\_eq}.  When this flag is set to \texttt{False} the 
+\texttt{equilibrate} routine is not called and no initial guess is returned.  The 
+\texttt{set\_initial\_guess} method still sets up the necessary solution objects for the 
+simulation.  In our application, when a previous solution is passed to the diffusion flame
+module, the flag \texttt{calc\_eq} is automatically set to \texttt{False}.  After 
+\texttt{set\_initial\_guess} is called, the solution fields are populated based on the 
+previous solution and the catchall fields are set to zero.  The inadequacy model 
+simulation is then able to run to completion modulo time integration convergence 
+problems (see below). 
+
+An additional modification that had to be made was to add a global Arrhenius 
+prefactor to the inadequacy model.  This was not a problem.  The activiation 
+energy field was specified in the reactions corresponding to the inadequacy 
+model.  Note that the calibration was performed for the global activation 
+temperature which is related to the global activation energy simply through 
+the universal gas constant via $T_{ag} = E_{ag} / R$. 
+
+The time integration failed to converge in the absence of the global 
+temperature dependence.  Using the global temperature dependence, the time 
+integration was successful but I still don't know why it didn't converge 
+originally.  Remember, the 0D reactor time integrator converges even in 
+the absence of the global temperature dependence (although it does struggle 
+once in a while).
+
+In any case, we can look at solutions from the diffusion flame and compare 
+the detailed, reduced and inadequacy models.  Note that the chains have 
+still not been completely propagated through the diffusion flame so there 
+may be some parameter values that are really tough to deal with.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
