@@ -137,16 +137,83 @@ the detailed, reduced and inadequacy models.  Note that the chains have
 still not been completely propagated through the diffusion flame so there 
 may be some parameter values that are really tough to deal with.
 
+Figure~\ref{fig:T_diffusion_flame} presents temperature profiles for the 
+diffusion flame.  For this parameter set, the reduced model looks better 
+than the inadequacy model.  The inset in~\ref{fig:T_diffusion_flame} indicates 
+that the inadequacy model is active near the boundary of the flame before 
+anything should happen.  However, the temperature change is only about one 
+degree Kelvin which is quite small.
+\begin{figure}[ht!]
+  \includegraphics[width=\textwidth]{September/Temperatures.pdf}
+  \caption{Diffusion flame emperature profiles from the detailed,
+           reduced, and inadequacy models.}
+  \label{fig:T_diffusion_flame}
+\end{figure}
 
+The catchall species are hopefully only active in the flame. 
+Figure~\ref{fig:catchall_profiles} helps to confirm this.  We observe that 
+the catchall species mass fractions only turn on inside the flame region and 
+appear to be inactive outside the flame.
+\begin{figure}[ht!]
+  \includegraphics[width=\textwidth]{September/Catchalls.pdf}
+  \caption{Profiles of the catchall mass fractions in the diffusion flame.}
+  \label{fig:catchall_profiles}
+\end{figure}
 
+We can consider the heat released due to combustion and the species reaction 
+rates in order to gain a more fine-grained understanding of the behavior 
+of the inadequacy model.  Figure~\ref{fig:heat_release} shows the heat of 
+combustion from each model.  The models are all in pretty good agreement 
+except for the region just before the flame on the fuel side of the domain. 
+In that region, the inadequacy model first releases heat and then absorbs 
+heat before finally releasing heat in agreement with the other two models.
+\begin{figure}[ht!]
+  \includegraphics[width=\textwidth]{September/heat_release.pdf}
+  \caption{Heat released in the diffusion flame for the detailed, 
+           reduced, and inadequacy models.}
+  \label{fig:heat_release}
+\end{figure}
 
+Figures~\ref{fig:reaction_rates_detailed}-~\ref{fig:reaction_rates_inadequacy} 
+present species reaction rates for the detailed, reduced, and inadequacy 
+models repectively.  This gives us a sense of which species are active or 
+inactive in specific regions of the domain.  Interestingly, the catchall 
+reaction rates do not appear to be active outside of the flame.  However, 
+the inadequacy solution is biases towards the fuel side of the flame.
+\begin{figure}[ht!]
+  \includegraphics[width=\textwidth]{September/reaction_rates_detailed.pdf}
+  \caption{Reaction rates for each species in the diffusion flame for the
+           detailed model.  The temperature profile from the detailed 
+           model is included as a reference for flame location.}
+  \label{fig:reaction_rates_detailed}
+\end{figure}
 
+\begin{figure}[ht!]
+  \includegraphics[width=\textwidth]{September/reaction_rates_reduced.pdf}
+  \caption{Reaction rates for each species in the diffusion flame for the
+           reduced model.  The temperature profile from the detailed 
+           model is included as a reference for flame location.}
+  \label{fig:reaction_rates_reduced}
+\end{figure}
 
+\begin{figure}[ht!]
+  \includegraphics[width=\textwidth]{September/reaction_rates_inadequacy.pdf}
+  \caption{Reaction rates for each species in the diffusion flame for the
+           inadequacy model.  The temperature profile from the detailed 
+           model is included as a reference for flame location.}
+  \label{fig:reaction_rates_inadequacy}
+\end{figure}
 
-
-
-
-
+Some possible next steps are included in the following:
+\begin{itemize}
+  \item Plot the enthalpies for each species.
+  \item Plot MAP point solutions.
+  \item Plot maximum likelihood solutions.
+  \item Start propagation of chain through the flamelet code
+        to generate the uncertain flamelet.
+  \item Work on reformulation of inadequacy model.
+  \item Try different global activation energies.
+\end{itemize}
 
 
 
